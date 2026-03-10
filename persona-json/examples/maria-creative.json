@@ -1,0 +1,142 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "generated": "2026-03-10T14:30:00Z",
+    "format": "agent-persona-profile",
+    "privacy": {
+      "identity": "public",
+      "career": "public",
+      "health": "agent-only",
+      "finance": "private"
+    }
+  },
+  "identity": {
+    "name": "Maria Santos",
+    "preferred_name": "Maria",
+    "age": 28,
+    "location_city": "Portland",
+    "location_state": "OR",
+    "location_country": "US",
+    "timezone": "US/Pacific",
+    "languages": ["English", "Portuguese", "Spanish"],
+    "pronouns": "she/her",
+    "bio": "Freelance designer who chases good light, good food, and weird thrift store finds."
+  },
+  "career": {
+    "job_title": "Freelance Brand & UX Designer",
+    "company": "Self-employed (Maria Santos Studio)",
+    "industry": "Design / Creative",
+    "years_experience": 5,
+    "hard_skills": ["Figma", "Illustrator", "After Effects", "Webflow", "Framer", "Brand strategy"],
+    "soft_skills": ["Client communication", "Project scoping", "Storytelling"],
+    "tools": ["Figma", "Notion", "Webflow", "Framer", "Arc Browser", "Mailchimp", "QuickBooks"],
+    "work_style": "Mix of both",
+    "work_schedule": "9am-2pm focused, 4pm-7pm second block, flexible",
+    "career_aspiration": "Build a small boutique agency (3-5 people), create a design course",
+    "past_roles": "Junior designer at a Portland agency (2021-2023), internship at Nike (2020)",
+    "education": "BFA Graphic Design, RISD"
+  },
+  "vehicles": {
+    "vehicle_1_year": 2020,
+    "vehicle_1_make": "Subaru",
+    "vehicle_1_model": "Crosstrek",
+    "vehicle_1_trim": "Premium, 2.0L",
+    "vehicle_1_mileage": 42000,
+    "vehicle_1_weekly_miles": 80,
+    "vehicle_1_fuel": "Regular Gas",
+    "vehicle_1_last_oil_change": "Dec 2025 / 39,000 mi",
+    "vehicle_1_last_tire_rotation": "Dec 2025 / 39,000 mi",
+    "commute_method": "Bike",
+    "commute_distance": 3
+  },
+  "health": {
+    "height": "5'5\"",
+    "weight": "130 lbs",
+    "allergies": "Dust mites, cats (mild)",
+    "medications": ["Iron supplement", "B12"],
+    "conditions": "Mild anxiety, TMJ",
+    "exercise_frequency": "4-6x/week",
+    "exercise_types": ["Yoga", "Cycling", "Hiking", "Pilates"],
+    "fitness_goals": "Consistent daily movement, flexibility, stress management",
+    "sleep_hours": 8,
+    "sleep_schedule": "10:30pm - 6:30am",
+    "steps_daily": 11000,
+    "wearable_device": "Oura Ring"
+  },
+  "food": {
+    "diet_type": "Vegan",
+    "food_allergies": ["Tree nuts (walnuts, pecans)"],
+    "favorite_cuisines": ["Thai", "Ethiopian", "Japanese", "Mexican"],
+    "favorite_foods": "Pad kra pao (tofu), injera with lentil stews, jackfruit carnitas",
+    "disliked_foods": "Anything with artificial sweeteners, raw bell peppers",
+    "cooking_skill": "Advanced / enthusiast",
+    "cooking_frequency": "Most meals",
+    "meals_per_day": "3",
+    "coffee_tea": "Oat milk cortado, herbal tea in the evening",
+    "alcohol": "Natural wine, mezcal occasionally, mostly don't drink",
+    "grocery_budget_weekly": 95,
+    "meal_prep": "Sometimes"
+  },
+  "home": {
+    "home_type": "Apartment",
+    "own_or_rent": "Rent",
+    "home_size": "700 sqft / 1BR",
+    "household_members": "Just me",
+    "pets": "None (want a dog eventually)",
+    "smart_home": "Just smart bulbs",
+    "home_projects": "Turning the spare closet into a photo backdrop setup",
+    "cleaning_frequency": "Weekly",
+    "yard_garden": "Balcony / patio",
+    "climate": "Rainy / overcast"
+  },
+  "finance": {
+    "income_range": "Variable / freelance",
+    "financial_goals": "Build 6-month emergency fund, start retirement savings, stabilize income to $8k/mo",
+    "monthly_savings_target": 600,
+    "investment_experience": "Beginner",
+    "investment_accounts": "Roth IRA (just opened)",
+    "debt_types": "Student loans ($18k remaining)",
+    "budget_method": "App (YNAB, Mint, etc.)",
+    "insurance_types": "Health (marketplace), renter's",
+    "side_income": "Sell prints on Etsy, occasional photography gigs",
+    "financial_stress_level": 6
+  },
+  "hobbies": {
+    "hobbies": ["Film photography", "Thrifting", "Hiking", "Ceramics", "Cooking", "Zine-making"],
+    "favorite_games": "Stardew Valley, Wordle, card games with friends",
+    "music_genres": ["Indie folk", "Bossa nova", "Ambient", "R&B"],
+    "favorite_artists": "Adrianne Lenker, Caetano Veloso, Japanese Breakfast, SZA",
+    "tv_movies": "Fleabag, Past Lives, Portrait of a Lady on Fire, Neon Genesis Evangelion",
+    "books_reading": "Currently reading 'The Creative Act' by Rick Rubin, love Haruki Murakami and Octavia Butler",
+    "sports_follow": "None really, casually watch the World Cup",
+    "sports_play": "Cycling, hiking",
+    "travel_style": "Cultural deep-dive",
+    "dream_destinations": "Lisbon, Oaxaca, Kyoto, Marrakech",
+    "collections": "Vintage film cameras, handmade ceramics",
+    "communities": ["Portland Design Meetup", "Local ceramics studio", "Freelance Twitter/X"]
+  },
+  "personality": {
+    "mbti": "INFP",
+    "enneagram": "4w5",
+    "communication_style": "Friendly but clear",
+    "humor_style": "Self-deprecating",
+    "learning_style": "Hands-on / doing",
+    "decision_making": "Overthink then decide last minute",
+    "morning_or_night": "Early bird",
+    "introvert_extrovert": "Ambivert",
+    "values": "Creativity, authenticity, sustainability, community",
+    "pet_peeves": "Scope creep without budget adjustment, ghosting, design-by-committee",
+    "agent_tone": "Friendly and casual",
+    "agent_verbosity": "Moderate — cover the key stuff"
+  },
+  "aspirations": {
+    "life_goals": "Build a sustainable creative business, travel to 30 countries, write and illustrate a book",
+    "learning_now": "Motion design (After Effects), Portuguese improvement, business finances",
+    "want_to_learn": "3D design (Blender), letterpress printing, public speaking",
+    "challenges": "Irregular freelance income, saying no to projects, imposter syndrome",
+    "proudest_achievement": "Rebranded a B-corp that won a regional design award",
+    "biggest_fear": "Never feeling financially stable as a creative",
+    "ideal_day": "Wake up early, yoga, farmers market, deep design work at a cafe, cook a big meal, film photography walk at golden hour",
+    "causes": "Sustainability, arts education, immigrant rights"
+  }
+}

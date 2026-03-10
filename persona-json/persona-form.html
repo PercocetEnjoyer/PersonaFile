@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>persona.json — Profile Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e2e2ef; font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
+  ::placeholder { color: #44445a; }
+  select option { background: #12121a; color: #e2e2ef; }
+  textarea { font-family: inherit; }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useCallback, useRef } = React;
+
+const SECTIONS = [
+  {
+    id: "identity", icon: "\u25C9", label: "Identity", description: "The basics \u2014 who you are",
+    fields: [
+      { key: "name", label: "Full Name", type: "text", placeholder: "Jane Doe" },
+      { key: "preferred_name", label: "What should I call you?", type: "text", placeholder: "Jane, JD, etc." },
+      { key: "age", label: "Age", type: "number", placeholder: "32" },
+      { key: "location_city", label: "City", type: "text", placeholder: "Austin" },
+      { key: "location_state", label: "State / Region", type: "text", placeholder: "TX" },
+      { key: "location_country", label: "Country", type: "text", placeholder: "US" },
+      { key: "timezone", label: "Timezone", type: "select", options: ["US/Eastern","US/Central","US/Mountain","US/Pacific","US/Alaska","US/Hawaii","Europe/London","Europe/Paris","Europe/Berlin","Asia/Tokyo","Asia/Shanghai","Australia/Sydney","Other"] },
+      { key: "languages", label: "Languages you speak", type: "text", placeholder: "English, Spanish" },
+      { key: "pronouns", label: "Pronouns", type: "select", options: ["he/him","she/her","they/them","other","prefer not to say"] },
+      { key: "bio", label: "One-liner about yourself", type: "textarea", placeholder: "Tinkerer, dog person, recovering perfectionist..." },
+    ],
+  },
+  {
+    id: "career", icon: "\u25C8", label: "Career & Skills", description: "What you do and what you're good at",
+    fields: [
+      { key: "job_title", label: "Current Job Title", type: "text", placeholder: "Staff Engineer" },
+      { key: "company", label: "Company / Org", type: "text", placeholder: "Acme Corp" },
+      { key: "industry", label: "Industry", type: "text", placeholder: "FinTech" },
+      { key: "years_experience", label: "Years of Experience", type: "number", placeholder: "8" },
+      { key: "hard_skills", label: "Hard Skills (comma-separated)", type: "textarea", placeholder: "Python, SQL, React, data analysis, project management..." },
+      { key: "soft_skills", label: "Soft Skills (comma-separated)", type: "textarea", placeholder: "Communication, leadership, mentoring..." },
+      { key: "tools", label: "Tools & Software You Use Daily", type: "textarea", placeholder: "VS Code, Figma, Slack, Notion, Linear..." },
+      { key: "work_style", label: "Work Style", type: "select", options: ["Deep focus / solo","Collaborative / pairing","Mix of both","Meetings-heavy","Async-first"] },
+      { key: "work_schedule", label: "Typical Work Hours", type: "text", placeholder: "9am-5pm, flexible, night owl shifts..." },
+      { key: "career_aspiration", label: "Where do you want to be in 3-5 years?", type: "textarea", placeholder: "Leading a team, starting a company, going freelance..." },
+      { key: "past_roles", label: "Notable Past Roles / Experience", type: "textarea", placeholder: "Worked at Google 2018-2021, ran a freelance agency..." },
+      { key: "education", label: "Education", type: "textarea", placeholder: "BS Computer Science, Stanford \u2014 or self-taught, bootcamp, etc." },
+      { key: "certifications", label: "Certifications / Licenses", type: "text", placeholder: "AWS Solutions Architect, PMP, CPA..." },
+    ],
+  },
+  {
+    id: "vehicles", icon: "\u25C6", label: "Vehicles", description: "Your cars, bikes, and how you get around",
+    fields: [
+      { key: "vehicle_1_year", label: "Vehicle 1 \u2014 Year", type: "number", placeholder: "2022" },
+      { key: "vehicle_1_make", label: "Vehicle 1 \u2014 Make", type: "text", placeholder: "Toyota" },
+      { key: "vehicle_1_model", label: "Vehicle 1 \u2014 Model", type: "text", placeholder: "Camry" },
+      { key: "vehicle_1_trim", label: "Vehicle 1 \u2014 Trim / Engine", type: "text", placeholder: "SE, 2.5L 4-cyl" },
+      { key: "vehicle_1_mileage", label: "Vehicle 1 \u2014 Current Mileage", type: "number", placeholder: "34000" },
+      { key: "vehicle_1_weekly_miles", label: "Vehicle 1 \u2014 Miles/Week You Drive", type: "number", placeholder: "150" },
+      { key: "vehicle_1_fuel", label: "Vehicle 1 \u2014 Fuel Type", type: "select", options: ["Regular Gas","Premium Gas","Diesel","Electric","Hybrid","Plug-in Hybrid","E85 / Flex"] },
+      { key: "vehicle_1_last_oil_change", label: "Vehicle 1 \u2014 Last Oil Change (date or mileage)", type: "text", placeholder: "Jan 2025 / 31,000 mi" },
+      { key: "vehicle_1_last_tire_rotation", label: "Vehicle 1 \u2014 Last Tire Rotation", type: "text", placeholder: "Dec 2024 / 29,500 mi" },
+      { key: "vehicle_2_year", label: "Vehicle 2 \u2014 Year (if applicable)", type: "number", placeholder: "2019" },
+      { key: "vehicle_2_make", label: "Vehicle 2 \u2014 Make", type: "text", placeholder: "Honda" },
+      { key: "vehicle_2_model", label: "Vehicle 2 \u2014 Model", type: "text", placeholder: "Civic" },
+      { key: "vehicle_2_mileage", label: "Vehicle 2 \u2014 Current Mileage", type: "number", placeholder: "68000" },
+      { key: "vehicle_2_weekly_miles", label: "Vehicle 2 \u2014 Miles/Week", type: "number", placeholder: "80" },
+      { key: "vehicle_2_fuel", label: "Vehicle 2 \u2014 Fuel Type", type: "select", options: ["Regular Gas","Premium Gas","Diesel","Electric","Hybrid","Plug-in Hybrid","E85 / Flex"] },
+      { key: "commute_method", label: "Primary Commute Method", type: "select", options: ["Drive alone","Carpool","Public transit","Bike","Walk","Remote / WFH","Motorcycle","Mix"] },
+      { key: "commute_distance", label: "One-way Commute Distance (miles)", type: "number", placeholder: "12" },
+    ],
+  },
+  {
+    id: "health", icon: "\u25CE", label: "Health & Fitness", description: "Your body, your routines, your goals",
+    fields: [
+      { key: "height", label: "Height", type: "text", placeholder: "5'10\" or 178cm" },
+      { key: "weight", label: "Weight", type: "text", placeholder: "170 lbs or 77 kg" },
+      { key: "blood_type", label: "Blood Type (if known)", type: "select", options: ["A+","A-","B+","B-","O+","O-","AB+","AB-","Don't know"] },
+      { key: "allergies", label: "Allergies", type: "textarea", placeholder: "Peanuts, penicillin, seasonal..." },
+      { key: "medications", label: "Current Medications / Supplements", type: "textarea", placeholder: "Vitamin D, magnesium, allergy meds..." },
+      { key: "conditions", label: "Health Conditions (anything an agent should know)", type: "textarea", placeholder: "Asthma, bad knee, etc." },
+      { key: "exercise_frequency", label: "How often do you exercise?", type: "select", options: ["Daily","4-6x/week","2-3x/week","Once a week","Rarely","Never"] },
+      { key: "exercise_types", label: "Types of Exercise", type: "textarea", placeholder: "Running, weightlifting, yoga, cycling..." },
+      { key: "fitness_goals", label: "Fitness Goals", type: "textarea", placeholder: "Run a half marathon, lose 15 lbs, get stronger..." },
+      { key: "sleep_hours", label: "Average Hours of Sleep", type: "number", placeholder: "7" },
+      { key: "sleep_schedule", label: "Typical Sleep Schedule", type: "text", placeholder: "11pm - 6:30am" },
+      { key: "steps_daily", label: "Average Daily Steps", type: "number", placeholder: "8000" },
+      { key: "wearable_device", label: "Fitness Tracker / Wearable", type: "text", placeholder: "Apple Watch, Garmin, Whoop, none..." },
+    ],
+  },
+  {
+    id: "food", icon: "\u25C7", label: "Food & Diet", description: "What you eat, love, and avoid",
+    fields: [
+      { key: "diet_type", label: "Diet Type", type: "select", options: ["No restrictions","Vegetarian","Vegan","Pescatarian","Keto","Paleo","Gluten-free","Halal","Kosher","Low-carb","Mediterranean","Other"] },
+      { key: "food_allergies", label: "Food Allergies / Intolerances", type: "textarea", placeholder: "Lactose intolerant, shellfish allergy..." },
+      { key: "favorite_cuisines", label: "Favorite Cuisines", type: "textarea", placeholder: "Thai, Mexican, Japanese, Italian..." },
+      { key: "favorite_foods", label: "Favorite Specific Foods / Dishes", type: "textarea", placeholder: "Birria tacos, pad see ew, margherita pizza..." },
+      { key: "disliked_foods", label: "Foods You Hate", type: "textarea", placeholder: "Olives, cilantro, liver..." },
+      { key: "cooking_skill", label: "Cooking Skill Level", type: "select", options: ["Can't cook","Basic / survival","Intermediate","Advanced / enthusiast","Professional"] },
+      { key: "cooking_frequency", label: "How often do you cook?", type: "select", options: ["Every meal","Most meals","A few times a week","Weekends only","Rarely","Never"] },
+      { key: "meals_per_day", label: "Meals Per Day", type: "select", options: ["1","2","3","4+","Intermittent fasting"] },
+      { key: "coffee_tea", label: "Coffee / Tea Preference", type: "text", placeholder: "Black coffee, oat milk latte, green tea..." },
+      { key: "alcohol", label: "Alcohol Preference", type: "text", placeholder: "Craft beer, red wine, don't drink..." },
+      { key: "grocery_budget_weekly", label: "Weekly Grocery Budget ($)", type: "number", placeholder: "120" },
+      { key: "meal_prep", label: "Do you meal prep?", type: "select", options: ["Yes, religiously","Sometimes","No but I want to","No"] },
+    ],
+  },
+  {
+    id: "home", icon: "\u25A3", label: "Home & Living", description: "Your space, your stuff, your setup",
+    fields: [
+      { key: "home_type", label: "Home Type", type: "select", options: ["House","Apartment","Condo","Townhouse","Mobile home","RV","Other"] },
+      { key: "own_or_rent", label: "Own or Rent?", type: "select", options: ["Own","Rent","Live with family","Other"] },
+      { key: "home_size", label: "Approximate Size (sq ft or bedrooms)", type: "text", placeholder: "1200 sqft / 2BR" },
+      { key: "household_members", label: "Who lives with you?", type: "textarea", placeholder: "Partner, 2 kids (ages 5, 8), a cat..." },
+      { key: "pets", label: "Pets (type, breed, age)", type: "textarea", placeholder: "Golden Retriever, 4 yrs; tabby cat, 2 yrs" },
+      { key: "smart_home", label: "Smart Home Devices", type: "textarea", placeholder: "Nest thermostat, Ring doorbell, Hue lights..." },
+      { key: "home_projects", label: "Current / Planned Home Projects", type: "textarea", placeholder: "Painting the bedroom, fixing the fence, new desk setup..." },
+      { key: "cleaning_frequency", label: "How often do you deep clean?", type: "select", options: ["Daily","Weekly","Bi-weekly","Monthly","When it gets bad"] },
+      { key: "yard_garden", label: "Yard / Garden?", type: "select", options: ["Yes, big yard","Small yard","Balcony / patio","No outdoor space"] },
+      { key: "climate", label: "Your Local Climate", type: "select", options: ["Hot & humid","Hot & dry","Mild / temperate","Cold & snowy","Rainy / overcast","Varies wildly by season"] },
+    ],
+  },
+  {
+    id: "finance", icon: "\u25D0", label: "Finance & Goals", description: "Your money situation and what you're working toward",
+    fields: [
+      { key: "income_range", label: "Annual Income Range", type: "select", options: ["Under $30k","$30k-$50k","$50k-$75k","$75k-$100k","$100k-$150k","$150k-$250k","$250k-$500k","$500k+","Prefer not to say","Variable / freelance"] },
+      { key: "financial_goals", label: "Top Financial Goals", type: "textarea", placeholder: "Pay off student loans, save for a house, retire early..." },
+      { key: "monthly_savings_target", label: "Monthly Savings Target ($)", type: "number", placeholder: "500" },
+      { key: "investment_experience", label: "Investment Experience", type: "select", options: ["None","Beginner","Intermediate","Advanced","Professional"] },
+      { key: "investment_accounts", label: "Investment Accounts You Use", type: "textarea", placeholder: "401k, Roth IRA, brokerage, crypto..." },
+      { key: "debt_types", label: "Types of Debt (if any)", type: "textarea", placeholder: "Student loans, mortgage, car payment, credit card..." },
+      { key: "budget_method", label: "Budgeting Method", type: "select", options: ["Don't budget","Mental math","Spreadsheet","App (YNAB, Mint, etc.)","Envelope method","Other"] },
+      { key: "insurance_types", label: "Insurance You Carry", type: "textarea", placeholder: "Health, auto, renter's, life, umbrella..." },
+      { key: "side_income", label: "Side Income / Hustles", type: "textarea", placeholder: "Freelancing, rental property, Etsy shop..." },
+      { key: "financial_stress_level", label: "Financial Stress Level (1-10)", type: "number", placeholder: "4" },
+    ],
+  },
+  {
+    id: "hobbies", icon: "\u2726", label: "Hobbies & Interests", description: "What you do for fun, what you nerd out about",
+    fields: [
+      { key: "hobbies", label: "Hobbies (comma-separated)", type: "textarea", placeholder: "Woodworking, gaming, hiking, photography, reading..." },
+      { key: "favorite_games", label: "Favorite Video Games / Board Games", type: "textarea", placeholder: "Elden Ring, Settlers of Catan, chess..." },
+      { key: "music_genres", label: "Music You Love", type: "textarea", placeholder: "Indie rock, lo-fi hip hop, jazz..." },
+      { key: "favorite_artists", label: "Favorite Artists / Bands", type: "text", placeholder: "Radiohead, Tyler the Creator, Khruangbin..." },
+      { key: "tv_movies", label: "Favorite Shows / Movies", type: "textarea", placeholder: "Breaking Bad, Interstellar, The Bear..." },
+      { key: "books_reading", label: "What are you reading / what do you like to read?", type: "textarea", placeholder: "Sci-fi, business books, currently reading Project Hail Mary..." },
+      { key: "sports_follow", label: "Sports You Follow", type: "textarea", placeholder: "NFL (Cowboys), NBA (Mavs), F1..." },
+      { key: "sports_play", label: "Sports You Play", type: "textarea", placeholder: "Basketball pickup games, golf, tennis..." },
+      { key: "travel_style", label: "Travel Style", type: "select", options: ["Budget backpacker","Mid-range comfort","Luxury","Adventure / outdoors","Cultural deep-dive","Road trips","Staycation person","Digital nomad"] },
+      { key: "dream_destinations", label: "Dream Travel Destinations", type: "textarea", placeholder: "Japan, Patagonia, Iceland, New Zealand..." },
+      { key: "collections", label: "Things You Collect", type: "text", placeholder: "Vinyl records, sneakers, vintage cameras..." },
+      { key: "communities", label: "Communities / Groups You're Part Of", type: "textarea", placeholder: "Local running club, Discord servers, Reddit communities..." },
+    ],
+  },
+  {
+    id: "personality", icon: "\u25CC", label: "Personality & Preferences", description: "How you think, communicate, and like to be helped",
+    fields: [
+      { key: "mbti", label: "MBTI (if you know it)", type: "text", placeholder: "INTJ, ENFP, etc." },
+      { key: "enneagram", label: "Enneagram (if you know it)", type: "text", placeholder: "Type 5, 3w4, etc." },
+      { key: "communication_style", label: "How do you prefer people communicate with you?", type: "select", options: ["Direct and blunt","Friendly but clear","Detailed and thorough","Casual and brief","Encouraging and supportive"] },
+      { key: "humor_style", label: "Your Humor Style", type: "select", options: ["Dry / deadpan","Sarcastic","Punny / dad jokes","Absurdist","Self-deprecating","Not really into humor","Dark humor"] },
+      { key: "learning_style", label: "How do you learn best?", type: "select", options: ["Reading / text","Video / visual","Hands-on / doing","Discussion / talking it out","Mix of everything"] },
+      { key: "decision_making", label: "How do you make decisions?", type: "select", options: ["Research everything first","Gut instinct","Ask others for input","Pro/con lists","Overthink then decide last minute"] },
+      { key: "morning_or_night", label: "Morning Person or Night Owl?", type: "select", options: ["Early bird","Night owl","Somewhere in between","Depends on the day"] },
+      { key: "introvert_extrovert", label: "Introvert / Extrovert Scale", type: "select", options: ["Strong introvert","Slight introvert","Ambivert","Slight extrovert","Strong extrovert"] },
+      { key: "values", label: "Core Values (what matters most to you)", type: "textarea", placeholder: "Family, freedom, creativity, honesty, impact..." },
+      { key: "pet_peeves", label: "Pet Peeves", type: "textarea", placeholder: "People who are late, passive aggression, loud chewing..." },
+      { key: "agent_tone", label: "How should an AI agent talk to you?", type: "select", options: ["Professional and formal","Friendly and casual","Nerdy / technical","Coach-like / motivating","Minimal \u2014 just the facts"] },
+      { key: "agent_verbosity", label: "How much detail do you want from agents?", type: "select", options: ["Give me everything","Moderate \u2014 cover the key stuff","Keep it short","Bullet points only","TL;DR then I'll ask for more"] },
+    ],
+  },
+  {
+    id: "aspirations", icon: "\u25B3", label: "Aspirations & Big Picture", description: "Where you're headed and what drives you",
+    fields: [
+      { key: "life_goals", label: "Big Life Goals", type: "textarea", placeholder: "Start a company, write a book, financial independence..." },
+      { key: "learning_now", label: "What are you actively learning?", type: "textarea", placeholder: "Rust programming, Spanish, piano, investing..." },
+      { key: "want_to_learn", label: "What do you want to learn next?", type: "textarea", placeholder: "Machine learning, woodworking, public speaking..." },
+      { key: "challenges", label: "Current Life Challenges", type: "textarea", placeholder: "Work-life balance, motivation, health stuff..." },
+      { key: "proudest_achievement", label: "Proudest Achievement", type: "textarea", placeholder: "Shipped a product used by millions, ran a marathon, raised great kids..." },
+      { key: "biggest_fear", label: "Biggest Fear / What Holds You Back", type: "textarea", placeholder: "Failure, not being good enough, wasting time..." },
+      { key: "ideal_day", label: "Describe Your Perfect Day", type: "textarea", placeholder: "Wake up early, workout, deep work for 4 hours, lunch with friends..." },
+      { key: "causes", label: "Causes You Care About", type: "textarea", placeholder: "Climate, education equity, open source, mental health..." },
+    ],
+  },
+];
+
+const T = {
+  bg: "#0a0a0f", surface: "#12121a", surfaceHover: "#1a1a25", border: "#1e1e2e",
+  borderFocus: "#6366f1", text: "#e2e2ef", textMuted: "#6b6b80", textDim: "#44445a",
+  accent: "#6366f1", accentSoft: "rgba(99,102,241,0.12)", accentGlow: "rgba(99,102,241,0.25)",
+  success: "#22c55e", warning: "#f59e0b",
+};
+
+function App() {
+  const [activeSection, setActiveSection] = useState("identity");
+  const [formData, setFormData] = useState({});
+  const [showExport, setShowExport] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [exportFormat, setExportFormat] = useState("json");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleChange = useCallback((key, value) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const filledCount = Object.values(formData).filter(v => v !== "" && v !== undefined && v !== null).length;
+  const totalFields = SECTIONS.reduce((sum, s) => sum + s.fields.length, 0);
+  const pct = Math.round((filledCount / totalFields) * 100);
+
+  const sectionFilledCount = (sid) => {
+    const sec = SECTIONS.find(s => s.id === sid);
+    return sec.fields.filter(f => formData[f.key] && formData[f.key] !== "").length;
+  };
+
+  const buildExport = () => {
+    const structured = {
+      _meta: {
+        version: "1.0",
+        generated: new Date().toISOString(),
+        format: "agent-persona-profile",
+        description: "Structured personal profile for AI agent consumption. Parse this to understand the user deeply."
+      }
+    };
+    const arrayHints = ["skill","hobbies","cuisines","types","genres","communities","languages","tools","artists","foods","destinations","accounts","insurance","allergies","medications","conditions"];
+    SECTIONS.forEach(section => {
+      structured[section.id] = {};
+      section.fields.forEach(field => {
+        const val = formData[field.key];
+        if (val !== undefined && val !== "" && val !== null) {
+          if (field.type === "number") {
+            structured[section.id][field.key] = Number(val);
+          } else if (typeof val === "string" && val.includes(",") && arrayHints.some(h => field.key.includes(h))) {
+            structured[section.id][field.key] = val.split(",").map(s => s.trim()).filter(Boolean);
+          } else {
+            structured[section.id][field.key] = val;
+          }
+        }
+      });
+      if (Object.keys(structured[section.id]).length === 0) delete structured[section.id];
+    });
+    return structured;
+  };
+
+  const toYaml = (obj, indent) => {
+    indent = indent || 0;
+    let out = "";
+    const pad = "  ".repeat(indent);
+    for (const k of Object.keys(obj)) {
+      const v = obj[k];
+      if (v && typeof v === "object" && !Array.isArray(v)) {
+        out += pad + k + ":\n" + toYaml(v, indent + 1);
+      } else if (Array.isArray(v)) {
+        out += pad + k + ":\n";
+        v.forEach(item => { out += pad + "  - " + item + "\n"; });
+      } else {
+        const val = typeof v === "string" && (v.includes(":") || v.includes("#") || v.includes("'")) ? '"' + v + '"' : v;
+        out += pad + k + ": " + val + "\n";
+      }
+    }
+    return out;
+  };
+
+  const getExportString = () => {
+    const data = buildExport();
+    return exportFormat === "json" ? JSON.stringify(data, null, 2) : toYaml(data);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(getExportString());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const ext = exportFormat === "json" ? "json" : "yaml";
+    const mime = exportFormat === "json" ? "application/json" : "text/yaml";
+    const blob = new Blob([getExportString()], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "my-persona." + ext; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const currentSection = SECTIONS.find(s => s.id === activeSection);
+
+  const navTo = (id) => { setActiveSection(id); setShowExport(false); setSidebarOpen(false); };
+
+  return React.createElement("div", { style: { minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif", display: "flex", flexDirection: "column" } },
+
+    // Header
+    React.createElement("div", { style: { padding: "20px 24px 16px", borderBottom: "1px solid " + T.border, flexShrink: 0 } },
+      React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12 } },
+          React.createElement("button", {
+            onClick: () => setSidebarOpen(!sidebarOpen),
+            style: { display: "none", background: "none", border: "1px solid " + T.border, borderRadius: 6, color: T.textMuted, padding: "6px 10px", cursor: "pointer", fontSize: 16, lineHeight: 1 },
+            className: "mobile-menu"
+          }, "\u2630"),
+          React.createElement("div", null,
+            React.createElement("h1", { style: { margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: "-0.02em", display: "flex", alignItems: "center", gap: 8 } },
+              React.createElement("span", { style: { color: T.accent, fontFamily: "'Space Mono', monospace", fontSize: 16 } }, "{}"),
+              "persona.json"
+            ),
+            React.createElement("p", { style: { margin: "2px 0 0", fontSize: 12, color: T.textMuted } }, "Fill what you want, skip what you don\u2019t \u2014 export for your agents")
+          )
+        ),
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+          React.createElement("span", { style: { fontSize: 11, fontFamily: "'Space Mono', monospace", color: T.textMuted } }, filledCount + "/" + totalFields),
+          React.createElement("div", { style: { width: 100, height: 5, background: T.border, borderRadius: 3, overflow: "hidden" } },
+            React.createElement("div", { style: { width: pct + "%", height: "100%", background: "linear-gradient(90deg, " + T.accent + ", #818cf8)", borderRadius: 3, transition: "width 0.4s ease" } })
+          ),
+          React.createElement("span", { style: { fontSize: 11, fontFamily: "'Space Mono', monospace", color: T.accent, fontWeight: 600 } }, pct + "%")
+        )
+      )
+    ),
+
+    // Body
+    React.createElement("div", { style: { display: "flex", flex: 1, minHeight: 0 } },
+
+      // Sidebar
+      React.createElement("div", {
+        className: "sidebar",
+        style: { width: 210, minWidth: 210, borderRight: "1px solid " + T.border, padding: "12px 0", overflowY: "auto", display: "flex", flexDirection: "column", gap: 1, background: T.bg, ...(sidebarOpen ? { position: "fixed", top: 0, left: 0, bottom: 0, zIndex: 100, paddingTop: 60 } : {}) }
+      },
+        SECTIONS.map(s => {
+          const filled = sectionFilledCount(s.id);
+          const total = s.fields.length;
+          const isActive = activeSection === s.id && !showExport;
+          return React.createElement("button", {
+            key: s.id,
+            onClick: () => navTo(s.id),
+            style: {
+              display: "flex", alignItems: "center", gap: 9, padding: "9px 18px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: isActive ? 600 : 400,
+              background: isActive ? T.accentSoft : "transparent", color: isActive ? T.accent : T.textMuted,
+              borderLeft: isActive ? "2px solid " + T.accent : "2px solid transparent",
+              transition: "all 0.15s ease", fontFamily: "inherit", textAlign: "left", width: "100%"
+            }
+          },
+            React.createElement("span", { style: { fontSize: 13, opacity: 0.7 } }, s.icon),
+            React.createElement("span", { style: { flex: 1 } }, s.label),
+            filled > 0 && React.createElement("span", {
+              style: {
+                fontSize: 10, fontFamily: "'Space Mono', monospace", padding: "1px 6px", borderRadius: 8,
+                background: filled === total ? "rgba(34,197,94,0.12)" : T.accentSoft,
+                color: filled === total ? T.success : T.accent
+              }
+            }, filled + "/" + total)
+          );
+        }),
+        React.createElement("div", { style: { borderTop: "1px solid " + T.border, margin: "10px 14px 0", paddingTop: 10 } },
+          React.createElement("button", {
+            onClick: () => { setShowExport(true); setSidebarOpen(false); },
+            style: {
+              display: "flex", alignItems: "center", gap: 9, padding: "9px 18px", border: "none", cursor: "pointer", fontSize: 13, fontWeight: showExport ? 600 : 500,
+              background: showExport ? "rgba(34,197,94,0.08)" : "transparent", color: T.success,
+              borderLeft: showExport ? "2px solid " + T.success : "2px solid transparent",
+              fontFamily: "inherit", textAlign: "left", width: "100%", borderRadius: 0
+            }
+          }, React.createElement("span", null, "\u2193"), " Export Profile")
+        )
+      ),
+
+      // Overlay for mobile sidebar
+      sidebarOpen && React.createElement("div", {
+        onClick: () => setSidebarOpen(false),
+        style: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 99 }
+      }),
+
+      // Main
+      React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "24px 32px 60px" } },
+        showExport ? (
+          // Export view
+          React.createElement("div", null,
+            React.createElement("h2", { style: { fontSize: 20, fontWeight: 700, margin: "0 0 4px" } }, "Export Your Persona"),
+            React.createElement("p", { style: { fontSize: 13, color: T.textMuted, margin: "0 0 20px" } }, "Copy this and feed it to any AI agent, drop it in a system prompt, or save it as a file."),
+            React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 14 } },
+              ["json", "yaml"].map(fmt =>
+                React.createElement("button", {
+                  key: fmt, onClick: () => setExportFormat(fmt),
+                  style: {
+                    padding: "5px 14px", fontSize: 12, fontFamily: "'Space Mono', monospace", fontWeight: 600, textTransform: "uppercase",
+                    border: "1px solid " + (exportFormat === fmt ? T.accent : T.border),
+                    background: exportFormat === fmt ? T.accentSoft : "transparent",
+                    color: exportFormat === fmt ? T.accent : T.textMuted, borderRadius: 6, cursor: "pointer"
+                  }
+                }, fmt)
+              )
+            ),
+            React.createElement("pre", {
+              style: {
+                background: T.surface, border: "1px solid " + T.border, borderRadius: 10, padding: 18,
+                fontSize: 12, fontFamily: "'Space Mono', monospace", lineHeight: 1.6,
+                color: T.textMuted, overflow: "auto", maxHeight: 420, whiteSpace: "pre-wrap", wordBreak: "break-word"
+              }
+            }, getExportString()),
+            React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" } },
+              React.createElement("button", {
+                onClick: handleCopy,
+                style: { padding: "10px 22px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 8, cursor: "pointer", background: copied ? T.success : T.accent, color: "#fff", transition: "background 0.2s", fontFamily: "inherit" }
+              }, copied ? "\u2713 Copied!" : "Copy to Clipboard"),
+              React.createElement("button", {
+                onClick: handleDownload,
+                style: { padding: "10px 22px", fontSize: 13, fontWeight: 600, border: "1px solid " + T.border, borderRadius: 8, cursor: "pointer", background: "transparent", color: T.text, fontFamily: "inherit" }
+              }, "Download ." + exportFormat)
+            ),
+            React.createElement("div", { style: { marginTop: 28, padding: 18, background: T.surface, borderRadius: 10, border: "1px solid " + T.border } },
+              React.createElement("h3", { style: { fontSize: 14, fontWeight: 600, margin: "0 0 8px" } }, "How to use this"),
+              React.createElement("p", { style: { fontSize: 13, color: T.textMuted, lineHeight: 1.7, margin: "0 0 6px" } },
+                React.createElement("strong", { style: { color: T.text } }, "System prompt: "), "Paste the JSON/YAML into your agent\u2019s system prompt with an instruction like \u201CHere is the user\u2019s profile. Use it to personalize your responses.\u201D"
+              ),
+              React.createElement("p", { style: { fontSize: 13, color: T.textMuted, lineHeight: 1.7, margin: "0 0 6px" } },
+                React.createElement("strong", { style: { color: T.text } }, "File reference: "), "Save as ", React.createElement("code", { style: { fontFamily: "'Space Mono', monospace", background: T.accentSoft, padding: "1px 5px", borderRadius: 3, fontSize: 11 } }, "persona.json"), " and point your agent to read it on startup."
+              ),
+              React.createElement("p", { style: { fontSize: 13, color: T.textMuted, lineHeight: 1.7, margin: 0 } },
+                React.createElement("strong", { style: { color: T.text } }, "MCP / tool: "), "Expose it as a tool response so agents can query specific sections as needed."
+              )
+            )
+          )
+        ) : (
+          // Form view
+          React.createElement("div", null,
+            React.createElement("div", { style: { marginBottom: 24 } },
+              React.createElement("h2", { style: { fontSize: 20, fontWeight: 700, margin: "0 0 4px", display: "flex", alignItems: "center", gap: 10 } },
+                React.createElement("span", { style: { color: T.accent } }, currentSection.icon),
+                currentSection.label
+              ),
+              React.createElement("p", { style: { fontSize: 13, color: T.textMuted, margin: 0 } }, currentSection.description)
+            ),
+            React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 20px" } },
+              currentSection.fields.map(field => {
+                const isFilled = formData[field.key] && formData[field.key] !== "";
+                const isTextarea = field.type === "textarea";
+                const isSelect = field.type === "select";
+                const span = isTextarea ? { gridColumn: "1 / -1" } : {};
+
+                return React.createElement("div", { key: field.key, style: span },
+                  React.createElement("label", { style: { display: "block", fontSize: 12, fontWeight: 500, color: isFilled ? T.text : T.textMuted, marginBottom: 5, transition: "color 0.2s" } }, field.label),
+                  isSelect ?
+                    React.createElement("select", {
+                      value: formData[field.key] || "",
+                      onChange: e => handleChange(field.key, e.target.value),
+                      style: {
+                        width: "100%", padding: "9px 12px", fontSize: 13, fontFamily: "inherit",
+                        background: T.surface, border: "1px solid " + (isFilled ? "rgba(99,102,241,0.25)" : T.border),
+                        borderRadius: 8, color: T.text, outline: "none", cursor: "pointer",
+                        appearance: "none", WebkitAppearance: "none",
+                        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b80' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
+                        backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center"
+                      }
+                    },
+                      React.createElement("option", { value: "" }, "Select..."),
+                      field.options.map(opt => React.createElement("option", { key: opt, value: opt }, opt))
+                    )
+                  : isTextarea ?
+                    React.createElement("textarea", {
+                      value: formData[field.key] || "",
+                      onChange: e => handleChange(field.key, e.target.value),
+                      placeholder: field.placeholder, rows: 3,
+                      style: {
+                        width: "100%", padding: "9px 12px", fontSize: 13, fontFamily: "inherit",
+                        background: T.surface, border: "1px solid " + (isFilled ? "rgba(99,102,241,0.25)" : T.border),
+                        borderRadius: 8, color: T.text, outline: "none", resize: "vertical", lineHeight: 1.5, boxSizing: "border-box"
+                      },
+                      onFocus: e => { e.target.style.borderColor = T.borderFocus; },
+                      onBlur: e => { e.target.style.borderColor = isFilled ? "rgba(99,102,241,0.25)" : T.border; }
+                    })
+                  :
+                    React.createElement("input", {
+                      type: field.type,
+                      value: formData[field.key] || "",
+                      onChange: e => handleChange(field.key, e.target.value),
+                      placeholder: field.placeholder,
+                      style: {
+                        width: "100%", padding: "9px 12px", fontSize: 13, fontFamily: "inherit",
+                        background: T.surface, border: "1px solid " + (isFilled ? "rgba(99,102,241,0.25)" : T.border),
+                        borderRadius: 8, color: T.text, outline: "none", boxSizing: "border-box"
+                      },
+                      onFocus: e => { e.target.style.borderColor = T.borderFocus; },
+                      onBlur: e => { e.target.style.borderColor = isFilled ? "rgba(99,102,241,0.25)" : T.border; }
+                    })
+                );
+              })
+            ),
+            // Nav buttons
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginTop: 32, paddingTop: 18, borderTop: "1px solid " + T.border } },
+              (() => {
+                const idx = SECTIONS.findIndex(s => s.id === activeSection);
+                const prev = idx > 0 ? SECTIONS[idx - 1] : null;
+                const next = idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
+                return [
+                  prev ? React.createElement("button", {
+                    key: "prev", onClick: () => navTo(prev.id),
+                    style: { padding: "8px 16px", fontSize: 13, fontWeight: 500, border: "1px solid " + T.border, borderRadius: 8, background: "transparent", color: T.textMuted, cursor: "pointer", fontFamily: "inherit" }
+                  }, "\u2190 " + prev.label) : React.createElement("div", { key: "empty" }),
+                  next ? React.createElement("button", {
+                    key: "next", onClick: () => navTo(next.id),
+                    style: { padding: "8px 16px", fontSize: 13, fontWeight: 500, border: "1px solid rgba(99,102,241,0.25)", borderRadius: 8, background: T.accentSoft, color: T.accent, cursor: "pointer", fontFamily: "inherit" }
+                  }, next.label + " \u2192") : React.createElement("button", {
+                    key: "export", onClick: () => setShowExport(true),
+                    style: { padding: "8px 20px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 8, background: T.success, color: "#fff", cursor: "pointer", fontFamily: "inherit" }
+                  }, "Export Profile \u2192")
+                ];
+              })()
+            )
+          )
+        )
+      )
+    ),
+
+    // Mobile style
+    React.createElement("style", null, `
+      @media (max-width: 768px) {
+        .sidebar { display: none !important; }
+        .sidebar[style*="position: fixed"] { display: flex !important; }
+        .mobile-menu { display: block !important; }
+        [style*="gridTemplateColumns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+      }
+    `)
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>

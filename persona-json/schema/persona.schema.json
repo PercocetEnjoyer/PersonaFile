@@ -1,0 +1,290 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/persona-json/persona.schema.json",
+  "title": "persona.json",
+  "description": "A structured personal profile format for AI agent consumption.",
+  "type": "object",
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "description": "Metadata about this profile.",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Schema version.",
+          "enum": ["1.0"]
+        },
+        "generated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when this profile was generated."
+        },
+        "format": {
+          "type": "string",
+          "const": "agent-persona-profile"
+        },
+        "description": {
+          "type": "string"
+        },
+        "privacy": {
+          "type": "object",
+          "description": "Per-section privacy tiers.",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["public", "agent-only", "private"]
+          }
+        }
+      },
+      "required": ["version", "format"]
+    },
+    "identity": {
+      "type": "object",
+      "description": "Basic identity information.",
+      "properties": {
+        "name": { "type": "string", "description": "Full name." },
+        "preferred_name": { "type": "string", "description": "What the user prefers to be called." },
+        "age": { "type": "integer", "minimum": 0, "maximum": 150 },
+        "location_city": { "type": "string" },
+        "location_state": { "type": "string" },
+        "location_country": { "type": "string" },
+        "timezone": { "type": "string" },
+        "languages": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "pronouns": { "type": "string" },
+        "bio": { "type": "string", "description": "Short one-liner self-description." }
+      },
+      "additionalProperties": true
+    },
+    "career": {
+      "type": "object",
+      "description": "Career, skills, and professional info.",
+      "properties": {
+        "job_title": { "type": "string" },
+        "company": { "type": "string" },
+        "industry": { "type": "string" },
+        "years_experience": { "type": "integer", "minimum": 0 },
+        "hard_skills": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "soft_skills": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "tools": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "work_style": { "type": "string" },
+        "work_schedule": { "type": "string" },
+        "career_aspiration": { "type": "string" },
+        "past_roles": { "type": "string" },
+        "education": { "type": "string" },
+        "certifications": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "vehicles": {
+      "type": "object",
+      "description": "Vehicles, commute, and transportation details.",
+      "properties": {
+        "vehicle_1_year": { "type": "integer" },
+        "vehicle_1_make": { "type": "string" },
+        "vehicle_1_model": { "type": "string" },
+        "vehicle_1_trim": { "type": "string" },
+        "vehicle_1_mileage": { "type": "integer", "minimum": 0 },
+        "vehicle_1_weekly_miles": { "type": "integer", "minimum": 0 },
+        "vehicle_1_fuel": { "type": "string" },
+        "vehicle_1_last_oil_change": { "type": "string" },
+        "vehicle_1_last_tire_rotation": { "type": "string" },
+        "vehicle_2_year": { "type": "integer" },
+        "vehicle_2_make": { "type": "string" },
+        "vehicle_2_model": { "type": "string" },
+        "vehicle_2_mileage": { "type": "integer", "minimum": 0 },
+        "vehicle_2_weekly_miles": { "type": "integer", "minimum": 0 },
+        "vehicle_2_fuel": { "type": "string" },
+        "commute_method": { "type": "string" },
+        "commute_distance": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "health": {
+      "type": "object",
+      "description": "Health, fitness, and wellness information.",
+      "properties": {
+        "height": { "type": "string" },
+        "weight": { "type": "string" },
+        "blood_type": { "type": "string" },
+        "allergies": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "medications": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "conditions": { "type": "string" },
+        "exercise_frequency": { "type": "string" },
+        "exercise_types": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "fitness_goals": { "type": "string" },
+        "sleep_hours": { "type": "number", "minimum": 0, "maximum": 24 },
+        "sleep_schedule": { "type": "string" },
+        "steps_daily": { "type": "integer", "minimum": 0 },
+        "wearable_device": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "food": {
+      "type": "object",
+      "description": "Diet, food preferences, and cooking habits.",
+      "properties": {
+        "diet_type": { "type": "string" },
+        "food_allergies": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "favorite_cuisines": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "favorite_foods": { "type": "string" },
+        "disliked_foods": { "type": "string" },
+        "cooking_skill": { "type": "string" },
+        "cooking_frequency": { "type": "string" },
+        "meals_per_day": { "type": "string" },
+        "coffee_tea": { "type": "string" },
+        "alcohol": { "type": "string" },
+        "grocery_budget_weekly": { "type": "number", "minimum": 0 },
+        "meal_prep": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "home": {
+      "type": "object",
+      "description": "Living situation, household, and home details.",
+      "properties": {
+        "home_type": { "type": "string" },
+        "own_or_rent": { "type": "string" },
+        "home_size": { "type": "string" },
+        "household_members": { "type": "string" },
+        "pets": { "type": "string" },
+        "smart_home": { "type": "string" },
+        "home_projects": { "type": "string" },
+        "cleaning_frequency": { "type": "string" },
+        "yard_garden": { "type": "string" },
+        "climate": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "finance": {
+      "type": "object",
+      "description": "Financial situation, goals, and habits.",
+      "properties": {
+        "income_range": { "type": "string" },
+        "financial_goals": { "type": "string" },
+        "monthly_savings_target": { "type": "number", "minimum": 0 },
+        "investment_experience": { "type": "string" },
+        "investment_accounts": { "type": "string" },
+        "debt_types": { "type": "string" },
+        "budget_method": { "type": "string" },
+        "insurance_types": { "type": "string" },
+        "side_income": { "type": "string" },
+        "financial_stress_level": { "type": "integer", "minimum": 1, "maximum": 10 }
+      },
+      "additionalProperties": true
+    },
+    "hobbies": {
+      "type": "object",
+      "description": "Hobbies, entertainment, and interests.",
+      "properties": {
+        "hobbies": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "favorite_games": { "type": "string" },
+        "music_genres": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "favorite_artists": { "type": "string" },
+        "tv_movies": { "type": "string" },
+        "books_reading": { "type": "string" },
+        "sports_follow": { "type": "string" },
+        "sports_play": { "type": "string" },
+        "travel_style": { "type": "string" },
+        "dream_destinations": { "type": "string" },
+        "collections": { "type": "string" },
+        "communities": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "personality": {
+      "type": "object",
+      "description": "Personality traits, preferences, and communication style.",
+      "properties": {
+        "mbti": { "type": "string" },
+        "enneagram": { "type": "string" },
+        "communication_style": { "type": "string" },
+        "humor_style": { "type": "string" },
+        "learning_style": { "type": "string" },
+        "decision_making": { "type": "string" },
+        "morning_or_night": { "type": "string" },
+        "introvert_extrovert": { "type": "string" },
+        "values": { "type": "string" },
+        "pet_peeves": { "type": "string" },
+        "agent_tone": { "type": "string" },
+        "agent_verbosity": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "aspirations": {
+      "type": "object",
+      "description": "Goals, learning, challenges, and big-picture direction.",
+      "properties": {
+        "life_goals": { "type": "string" },
+        "learning_now": { "type": "string" },
+        "want_to_learn": { "type": "string" },
+        "challenges": { "type": "string" },
+        "proudest_achievement": { "type": "string" },
+        "biggest_fear": { "type": "string" },
+        "ideal_day": { "type": "string" },
+        "causes": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": ["_meta"],
+  "additionalProperties": true
+}
